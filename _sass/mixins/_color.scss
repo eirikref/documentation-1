@@ -1,0 +1,38 @@
+$vsp-palette: ();
+
+@function vsp-color($color, $weight: 50)
+{
+    @if not(variable-exists("vsp-colors")) {
+        @error "Color map $vsp-colors does not exist.";
+    }
+
+    @if not(map-has-key($vsp-colors, $color)) {
+        @error "Color '#{$color}' does not exist in color map.";
+    }
+
+    @if not(is-integer($weight)) or ($weight < 0) or ($weight > 100) {
+        @error "$weight must be an integer between 0 and 100.";
+    }
+
+    $name: #{$color}-#{$weight};
+
+    @if (map-has-key($vsp-palette, $name)) {
+        @return map-get($vsp-palette, $name);
+    }
+
+    $orig: map-get($vsp-colors, $color);
+    $new-color: $orig;
+
+    @if ($weight < 50) {
+        $percent: (50 - $weight) * 2;
+        $new-color: mix(black, $orig, $percent);
+    } @else if ($weight > 50) {
+        $percent: ($weight - 50) * 2;
+        $new-color: mix(white, $orig, $percent);
+    }
+
+    $new-map: (#{$name}: $new-color);
+    $vsp-palette: map-merge($vsp-palette, $new-map) !global;
+
+    @return $new-color;
+}
